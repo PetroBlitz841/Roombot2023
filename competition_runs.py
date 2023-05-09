@@ -65,16 +65,16 @@ def green_run():
 
     # TV Mission
     gyro_follow(400, 7, angle=0, stop=False)
-    accelerate(1.3, 350, 100)  # מאט לפני שדוחף טלוויזיה
+    accelerate(1.3, 350, 100)  #
     wheels.stop()
     gyro_follow(-300, 3.5)
-    no_wall_turn(-45)  # מסובב את הרובוט בלי הקיר לכיוון הבטרייה הנטענת
-    gyro_follow(400, 16, angle=-45, kp=1)  # הולך לכיוון הטורבינה ועושה את זה פעם אחת
+    no_wall_turn(-45)  #
+    gyro_follow(400, 16, angle=-45, kp=1)  #
 
     # WIND TURBINE
-    turn_to_angle(41)  # פונה לכיוון טורבינת רוח
+    turn_to_angle(41)  #
     wall_turn(0)
-    gyro_time(550, 2.2, angle=40, kp=1.5)  # הולך לכיוון הטורבינה ועושה את זה פעם אחת
+    gyro_time(550, 2.2, angle=40, kp=1.5)  #
 
     for i in range(3):
         wheels.straight(70)  # backwards
@@ -186,10 +186,10 @@ def red_run():
 def violet_run():
     reset()
     gyro_follow(60, 6.5, angle=0, kp=2, stop=True)  # back from mager enrgia
-    wall_turn(270)  # הקיר מסתוב ומזיז ילידת מים
-    wheels.drive(40, 0)  # הרובוט נוסע ולוקח יחידת אנריגה
-    wait(1000)  # הרובוט מחכה
-    wheels.drive(-100, 0)  # הרובוט חוזר הביתה
+    wall_turn(270)  #
+    wheels.drive(40, 0)  #
+    wait(1000)  #
+    wheels.drive(-100, 0)  #
     while True:
         pass
 
@@ -197,7 +197,7 @@ def violet_run():
 def blue_run():
     reset()
     # relissing 3 untis to magar enrgia
-    gyro_until_black(45, angle=0, kp=2, sensor=frontCS, stop=True)  # לתחילת הקו השחור
+    gyro_until_black(45, angle=0, kp=2, sensor=frontCS, stop=True)  #
     wheels.straight(90)
     wall.run_angle(180, 45, then=Stop.HOLD, wait=True)
     turn_to_angle(38)
@@ -225,7 +225,7 @@ def blue_run():
 def yellow_run():
     reset()
     wall_turn(90)
-    gyro_follow(40, 18, 0, kp=0.4)  # לנסועה עד למשימה
+    gyro_follow(40, 18, 0, kp=0.4)  #
     wall.run_angle(180, -180, then=Stop.HOLD, wait=True)
     wheels.drive(-70, -77)
 
@@ -236,10 +236,9 @@ def yellow_run():
 def haratza9():
     reset()
     wall_turn(42)
-    gyro_time(90, 3, 0, kp=1.5)  # לנסועה עד למשימה
-    gyro_follow(-60, 1, 0, kp=1.5)  # לנסועה עד למשימה
-    gyro_time(80, 0.5, 0, kp=1.5)  # לנסועה עד למשימה
-
+    gyro_time(90, 3, 0, kp=1.5)  #
+    gyro_follow(-60, 1, 0, kp=1.5)  #
+    gyro_time(80, 0.5, 0, kp=1.5)  #
     wheels.drive(-70, -5)
 
     while True:

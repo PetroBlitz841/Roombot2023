@@ -43,6 +43,7 @@ COLOR_LIST = [
     Color.YELLOW,
     Color.MAGENTA,
     Color.NONE,
+    Color.CYAN,
 ]
 frontCS.detectable_colors(COLOR_LIST)
 backCS.detectable_colors(COLOR_LIST)
@@ -54,6 +55,7 @@ WHITE = 98
 # Reset Wheels
 leftW.reset_angle(0)
 rightW.reset_angle(0)
+settings = wheels.settings()
 
 # Print info
 print(f"Battery: V {hub.battery.voltage()} C {hub.battery.current()}")
@@ -141,155 +143,160 @@ def green_run():
 
 def red_run():
     reset()
-    wheels.drive(330, -5)  # back from the factory
-    wait(2000)
-    # gyro_time(300, 2, 0)  # drive to the factory
-    wheels.straight(-190)  # back from the factory
 
-    # Power Plant
-    no_wall_turn(-45)
+    # TOY FACTORY
+    wheels.drive(330, 0)
+    wait(2000)
+    wheels.straight(-200)  # back from the factory
+
+    # POWER PLANT
+    no_wall_turn(-55)
     wall_turn(90)  # positioning to drive to black line
     wheels.drive(350, 0)
-    wait(700)
-    gyro_until_black(
-        350, angle=-38, kp=1.2, sensor=frontCS, stop=False
-    )  # drive to black line
-
-    wheels.straight(
-        60,
-    )  # center robot on black line
-    no_wall_turn(45)  # turn in place
-    wheels.drive(250, 0)  # drive until green
-    # sees_green = False
+    wait(900)
+    turn_to_angle(-20)
+    drive_until_black(speed=300, stop=False)
+    wheels.straight(450)  # center robot on black line
+    no_wall_turn(48)  # turn in place
+    wheels.drive(150, 0)  # drive until green
     while not frontCS.color() == Color.GREEN:
         ...
+    wheels_stop()
+    wall_turn(90)  # turn wall to position
+    follow_line(-150, 105, kp=3, side="right", sensor=backCS, stop=False)
+    wheels.drive(-500, turn_rate=0)
+    wait(800)
+    wheels_stop()
+
+    # SMART GRID
+    wheels.straight(30)
+    turn_to_angle(48)
+    wheels.straight(600)
+
     # rgb = frontCS.get_rgb_intensity()
     # sees_green = (rgb[1] - ((rgb[0] + rgb[2]) / 2) > 75) and rgb[
     #     3
     # ] < 800  # Green is 75 higher than average of red and blue, excluding white
 
-    leftW.hold()
-    rightW.hold()
-    wall_turn(90)  # turn wall to position
-    follow_line(
-        -150, 105, kp=3, side="right", sensor=backCS, stop=False
-    )  # align trigger
-    # towards power plant
-    wheels.stop()
 
-    rightW.run_time(-700, 1500, then=Stop.HOLD, wait=False)
-    leftW.run_time(-700, 1500, then=Stop.HOLD, wait=True)
+# ------
+# leftW.hold()
+# rightW.hold()
+# wall_turn(90)  # turn wall to position
+# follow_line(
+#     -150, 105, kp=3, side="right", sensor=backCS, stop=False
+# )  # align trigger
+# # towards power plant
+# --------
+# rightW.run_time(-700, 1500, then=Stop.HOLD, wait=False)
+# leftW.run_time(-700, 1500, then=Stop.HOLD, wait=True)
 
-    # if hub.imu.heading() >= 50:
-    #     rightW.run_angle(200, 35)
+# if hub.imu.heading() >= 50:
+#     rightW.run_angle(200, 35)
 
-    # reverse from power plant
-    leftW.run_time(250, 800, then=Stop.HOLD, wait=True)
-    rightW.run_time(250, 800, then=Stop.HOLD, wait=True)
-    # Smart Electricity Grid
-    wheels.straight(100)
-    # turn_to_angle(50)  # turn to grid
+# reverse from power plant
+# leftW.run_time(250, 800, then=Stop.HOLD, wait=True)
+# rightW.run_time(250, 800, then=Stop.HOLD, wait=True)
+# # Smart Electricity Grid
+# wheels.straight(100)
+# # turn_to_angle(50)  # turn to grid
 
-    wall_turn(90)  # position grabbing attachment
-    wheels.straight(550)
-    gyro_follow(350, 20, 50, kp=0.5)
-    # accelerate(0.5, 400, 200)  # grab
-    wheels.stop()
+# wall_turn(90)  # position grabbing attachment
+# wheels.straight(550)
+# gyro_follow(350, 20, 50, kp=0.5)
+# # accelerate(0.5, 400, 200)  # grab
+# wheels.stop()
 
-    # # Water Units
-    # gyro_until_black(-35, hub.imu.heading())  # back until line
-    # gyro_follow(-45, 1, 46, kp=0.5)  # back
-    # turn_to_angle(-45)  # turn towards water units
-    # gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
-    # gyro_follow(-75, 3, -55, kp=0.5)  # back
-    # turn_to_angle(0)  # turn to line
+# # Water Units
+# gyro_until_black(-35, hub.imu.heading())  # back until line
+# gyro_follow(-45, 1, 46, kp=0.5)  # back
+# turn_to_angle(-45)  # turn towards water units
+# gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
+# gyro_follow(-75, 3, -55, kp=0.5)  # back
+# turn_to_angle(0)  # turn to line
 
-    # # Oil Rig
-    # gyro_until_black(30, 1)  # back until line
-    # gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
-    # turn_until_black(25)
-    # follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
-    # wall_turn(50)  # Position ramp
-    # gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
+# # Oil Rig
+# gyro_until_black(30, 1)  # back until line
+# gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
+# turn_until_black(25)
+# follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
+# wall_turn(50)  # Position ramp
+# gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
 
-    # for i in range(3):  # Push oil rig
-    #     # drive back
-    #     leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-    #     rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-    #     # drive forward
-    #     leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
-    #     rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
-    # # Back to base
-    # wheels.straight(80)
-    # no_wall_turn(-105)
-    # wheels.drive(80, 0)
+# for i in range(3):  # Push oil rig
+#     # drive back
+#     leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+#     rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+#     # drive forward
+#     leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
+#     rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
+# # Back to base
+# wheels.straight(80)
+# no_wall_turn(-105)
+# wheels.drive(80, 0)
 
-    # wait(3000)
-    # while True:
-    #     pass
+# wait(3000)
+# while True:
+#     pass
 
 
-def violet_run():
+def cyan_run():
     reset()
-    gyro_follow(60, 6.5, angle=0, kp=2, stop=True)  # forward to m11
-    wall_turn(270)  # turn wall to move enrgay unite
-    wheels.drive(40, 0)  # take unite and water unite
-    wait(1000)  # wait fir water to drop
-    wheels.drive(-100, 0)
-    while True:
-        pass
+    wheels.settings(straight_speed=500)
+    wheels.straight(230)
+    wall_turn(-90)  # turn wall to move enrgay unite
+    wheels.drive(500, 0)  # take unite and water unite
+    wait(800)  # wait fir water to drop
+    wheels.drive(-600, 0)
 
 
 def blue_run():
     reset()
     # relissing 3 untis to magar enrgia
-    gyro_until_black(45, angle=0, kp=2, sensor=frontCS, stop=True)  # לתחילת הקו השחור
+    gyro_until_black(250, angle=0, kp=2, sensor=frontCS, stop=False)  # לתחילת הקו השחור
     wheels.straight(90)
-    wall.run_angle(180, 45, then=Stop.HOLD, wait=True)
+    wall.run_angle(600, 45, then=Stop.HOLD, wait=True)
     turn_to_angle(38)
-    follow_line_time(
-        35, 3.5, kp=0.5, side="left", sensor=frontCS, stop=True
-    )  # towarsds energy storage
-    # gyro_time(40,0.7 ,0)
+    follow_line_time(170, 2.8, kp=2.7, side="left", sensor=frontCS, stop=True)
+    # towarsds energy storage
 
     # solar farm
-    gyro_follow(-35, 2, angle=3, kp=2, stop=True)  # back from mager enrgia
+    wheels.settings(straight_speed=300)
+    wheels.straight(-30)
     turn_to_angle(90)  # turn
-    gyro_follow(40, 5.5, angle=91, kp=2, stop=True)  # twords enrgy untis in solar farms
+    wheels.straight(200)
     wall.run_angle(180, -135, then=Stop.HOLD, wait=True)  # tirn wall to good postion
-    turn_to_angle(2)  # turn t 2 units
-    gyro_time(35, 2, angle=0, kp=1.8)  # take 2 units
-    gyro_follow(-35, 0.8, angle=2, kp=2, stop=True)  # backwored a bit
-    no_wall_turn(90)  # turn to third unit
-    gyro_follow(60, 11.5, angle=90, kp=2, stop=True)  # taking third unit
+    turn_to_angle(0)  # turn t 2 units
+    wheels.drive(250, 0)  # take 2 units
+    wait(1000)
+    wheels.straight(-1)
+    no_wall_turn(85)  # turn to third unit
+    wheels.settings(straight_speed=500)
+    wheels.straight(380)
 
-    # power to x
-    turn_to_angle(-23)  # turn to power to x
-    gyro_follow(-80, 11, angle=-36, kp=2, stop=True)  # go to power to x
+    # # power to x
+    turn_to_angle(-35)  # turn to power to x
+    wheels.settings(straight_speed=300)
+    wheels.straight(-385)
 
 
 def yellow_run():
     reset()
     wall_turn(90)
-    gyro_follow(40, 18, 0, kp=0.4)  # drive until m12
-    wall.run_angle(180, -180, then=Stop.HOLD, wait=True)
-    wheels.drive(-70, -77)
-
-    while True:
-        pass
+    wheels.straight(600)
+    # gyro_follow(200, 60, 0, kp=0.2)  # drive until m12
+    wall.run_angle(1000, -180, then=Stop.HOLD, wait=True)
+    wheels.drive(-450, 15)
 
 
 def haratza9():
     reset()
-    wall_turn(42)
-    gyro_time(450, 3, 0, kp=1.5)  # going to power plant
-    gyro_follow(-300, 1, 0, kp=1.5)  # going to power plant
-    gyro_time(400, 0.5, 0, kp=1.5)  # going to power plant
-
-    wheels.drive(-400, -5)
-
-    while True:
-        pass
+    wall.run_angle(700, 45)
+    wheels.drive(450, 0)
+    wait(2000)
+    wall.run_angle(700, 45)
+    wall.run_angle(700, -45)
+    wheels.drive(-400, 0)
 
 
 # ________________________________________________________________________________________________________________
@@ -309,6 +316,15 @@ def reset():
     """
     wall.reset_angle(0)
     hub.imu.reset_heading(0)
+    wheels.settings(settings[0], settings[1], settings[2], settings[3])
+
+
+def deg_to_cm(degrees):
+    return (degrees / 360) * W_CIRC
+
+
+def cm_to_deg(cm):
+    return (cm * 10 / W_CIRC) * 360
 
 
 def turn_in_place(speed):
@@ -329,6 +345,17 @@ def gyro_until_black(base_speed, angle=0, kp=2, sensor=frontCS, stop=True, black
         error = angle - hub.imu.heading()
         leftW.run(base_speed + int(error * kp))
         rightW.run(base_speed - int(error * kp))
+
+    if stop:
+        leftW.hold()
+        rightW.hold()
+
+
+def drive_until_black(
+    speed, sensor=frontCS, turn_rate=0, stop=True, black=BLACK, min_distance=0
+):
+    while sensor.reflection() > black:
+        wheels.drive(speed, turn_rate=turn_rate)
 
     if stop:
         leftW.hold()
@@ -429,17 +456,14 @@ def no_wall_turn(angle, speed=180):
     wall.control.limits(acceleration=motor_acceleration)
 
 
-def deg_to_cm(degrees):
-    return (degrees / 360) * W_CIRC
-
-
-def cm_to_deg(cm):
-    return (cm * 10 / W_CIRC) * 360
-
-
 def get_average_distance():
     """Returns the average distance of both wheels"""
     return deg_to_cm((abs(rightW.angle())) + abs(leftW.angle())) / 2
+
+
+def wheels_stop():
+    rightW.hold()
+    leftW.hold()
 
 
 def follow_line(base_speed, distance, kp=3, side="right", sensor=frontCS, stop=True):
@@ -518,7 +542,7 @@ def accelerate(seconds, start_power, end_power, stop=False):
 RUNS = [
     green_run,
     red_run,
-    violet_run,
+    cyan_run,
     blue_run,
     yellow_run,
     haratza9,
@@ -526,7 +550,7 @@ RUNS = [
 RUN_COLORS = [
     Color.GREEN,
     Color.RED,
-    Color.MAGENTA,
+    Color.CYAN,
     Color.BLUE,
     Color.YELLOW,
     Color.BLACK,
@@ -534,7 +558,6 @@ RUN_COLORS = [
 
 
 reset()
-
 
 current_run = 0
 

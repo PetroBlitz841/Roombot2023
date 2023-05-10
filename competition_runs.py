@@ -74,6 +74,7 @@ print(
 print(
     f"Wall: S {wall.control.limits()[0]} A {wall.control.limits()[1]} T {wall.control.limits()[2]}"
 )
+print("is ready: ", hub.imu.ready())
 
 
 class PetroError(Exception):
@@ -143,80 +144,102 @@ def green_run():
 
 def red_run():
     reset()
-    gyro_time(60, 2, 0)  # drive to the factory
-    gyro_follow(-45, 8, 0)  # back from the factory
+    wheels.settings(straight_speed=400)
 
-    # Power Plant
-    no_wall_turn(-41)
-    wall_turn(90)  # positioning to drive to black line
-    gyro_time(65, 0.6, -41, kp=1, stop=False)
-    gyro_until_black(
-        70, angle=-35, kp=1.2, sensor=frontCS, black=32
-    )  # drive to black line
+    # TOY FACTORY
+    wheels.straight(450)
 
-    wheels.straight(35, then=Stop.HOLD, wait=True)  # center robot on black line
-    no_wall_turn(45)  # turn in place
-    wheels.drive(35, 0)  # drive until green
-    # sees_green = False
+    # POWER PLANT
+    wheels.straight(-230)  # back from toy factory
+    no_wall_turn(-55)
+    wall_turn(90)
+    wheels.drive(350, 0)
+    wait(1000)
+    wheels_stop()
+    turn_to_angle(-29)
+    gyro_until_black(300, -29, stop=False)  # until black
+    wheels.straight(65)
+    no_wall_turn(50)
+    wheels.straight(1000, wait=False)
     while not frontCS.color() == Color.GREEN:
         ...
-    # rgb = frontCS.get_rgb_intensity()
-    # sees_green = (rgb[1] - ((rgb[0] + rgb[2]) / 2) > 75) and rgb[
-    #     3
-    # ] < 800  # Green is 75 higher than average of red and blue, excluding white
-
-    wheels.stop()
-    wall_turn(85)  # turn wall to position
-    follow_line(
-        -32, 12, kp=0.7, side="right", sensor=backCS, stop=False
-    )  # align trigger
-    # towards power plant
-    rightW.run_time(-55, 1700, then=Stop.HOLD, wait=True)
-    leftW.run_time(-55, 1700, then=Stop.HOLD, wait=True)
+    wheels_stop()
+    wall_turn(90)  # set wall
+    follow_line(-250, 170, kp=3.4, sensor=backCS, stop=False)
+    wheels.settings(straight_speed=320)
+    # wheels.straight(-110)
+    wheels.drive(-250, 0)
+    wait(900)
+    timer = StopWatch()
+    timer.reset()
+    while not wheels.stalled() or (timer.time() < 2000):
+        print(timer.time())
+        pass
+    wait(200)
+    wheels_stop()
     if hub.imu.heading() >= 50:
         rightW.run_angle(20, 35)
-    # reverse from power plant
-    leftW.run_time(30, 800, then=Stop.HOLD, wait=True)
-    rightW.run_time(30, 800, then=Stop.HOLD, wait=True)
 
-    # Smart Electricity Grid
-    turn_to_angle(45)  # turn to grid
-    wall_turn(90)  # position grabbing attachment
-    gyro_follow(60, 20, 46, kp=0.5)
-    accelerate(0.5, 60, 15)  # grab
-    wheels.stop()
+    # SMART GRID
+    wheels.settings(straight_speed=200)
+    wheels.straight(50)
+    # turn_to_angle(46)
+    wheels.settings(straight_speed=200)
+    turn_to_angle(46)
+    wheels.straight(750)
+    # gyro_until_black(-300, angle=47, stop=False)
 
-    # Water Units
-    gyro_until_black(-35, hub.imu.heading())  # back until line
-    gyro_follow(-45, 1, 46, kp=0.5)  # back
-    turn_to_angle(-45)  # turn towards water units
-    gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
-    gyro_follow(-75, 3, -55, kp=0.5)  # back
-    turn_to_angle(0)  # turn to line
+    # WATER UNITS
+    wheels.straight(-130)
+    turn_to_angle(-50)
+    wheels.straight(180)
+    wheels.straight(-120)
+    turn_to_angle(-25)
+    gyro_until_black(300, -25, stop=False)
+    wheels.straight(200)
+    # turn_to_angle(-45)
+    turn_until_black(-150)
+    leftW.run_angle(400, 25)
+    wait(1000)
+    follow_line(250, 300, kp=3.4, sensor=frontCS, stop=False)
+    # rightW.run_angle(180, 20)
 
-    # Oil Rig
-    gyro_until_black(30, 1)  # back until line
-    gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
-    turn_until_black(25)
-    follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
-    wall_turn(50)  # Position ramp
-    gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
+    # follow_line(300, 200)
+    # wall_turn(45)
 
-    for i in range(3):  # Push oil rig
-        # drive back
-        leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-        rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-        # drive forward
-        leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
-        rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
-    # Back to base
-    wheels.straight(80)
-    no_wall_turn(-105)
-    wheels.drive(80, 0)
+    # ___________________________________________________________
+    # wait(20000)
+    # # Water Units
+    # gyro_until_black(-35, hub.imu.heading())  # back until line
+    # gyro_follow(-45, 1, 46, kp=0.5)  # back
+    # turn_to_angle(-45)  # turn towards water units
+    # gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
+    # gyro_follow(-75, 3, -55, kp=0.5)  # back
+    # turn_to_angle(0)  # turn to line
 
-    wait(3000)
-    while True:
-        pass
+    # # Oil Rig
+    # gyro_until_black(30, 1)  # back until line
+    # gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
+    # turn_until_black(25)
+    # follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
+    # wall_turn(50)  # Position ramp
+    # gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
+
+    # for i in range(3):  # Push oil rig
+    #     # drive back
+    #     leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+    #     rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+    #     # drive forward
+    #     leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
+    #     rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
+    # # Back to base
+    # wheels.straight(80)
+    # no_wall_turn(-105)
+    # wheels.drive(80, 0)
+
+    # wait(3000)
+    # while True:
+    #     pass
 
 
 def cyan_run():
@@ -310,7 +333,7 @@ def turn_in_place(speed):
     """Turns in place by deg/s until stopped
     speed: deg/s of the robot"""
     leftW.run(speed * W_DISTANCE / W_DIAMETER)
-    rightW.run(speed * W_DISTANCE / W_DIAMETER)
+    rightW.run(-speed * W_DISTANCE / W_DIAMETER)
 
 
 def gyro_until_black(base_speed, angle=0, kp=2, sensor=frontCS, stop=True, black=BLACK):
@@ -330,15 +353,12 @@ def gyro_until_black(base_speed, angle=0, kp=2, sensor=frontCS, stop=True, black
         rightW.hold()
 
 
-def drive_until_black(
-    speed, sensor=frontCS, turn_rate=0, stop=True, black=BLACK, min_distance=0
-):
+def drive_until_black(speed, sensor=frontCS, turn_rate=0, stop=True, black=BLACK):
     while sensor.reflection() > black:
         wheels.drive(speed, turn_rate=turn_rate)
 
     if stop:
-        leftW.hold()
-        rightW.hold()
+        wheels_stop()
 
 
 def turn_until_black(speed, sensor=frontCS):
@@ -387,7 +407,7 @@ def gyro_time(base_speed, seconds, angle=0, kp=2, stop=True):
         rightW.hold()
 
 
-def turn_to_angle(angle, speed=180):
+def turn_to_angle(angle, speed=200, max_time=3):
     """Turns to a specified absolute gyro angle"""
 
     timer = StopWatch()
@@ -397,19 +417,10 @@ def turn_to_angle(angle, speed=180):
     robot_acceleration = wheels.settings()[3]
     wheels.settings(turn_rate=speed)
     wheels.turn(distance)
+
+    # while (timer.time()) < (max_time * 1000) and angle - hub.imu.heading() > 1:
+    #     ...
     wheels.settings(turn_rate=robot_acceleration)
-    # direction = 1 if distance % 360 < 180 else -1
-
-    # # Wait until the robot has turned the desired number of degrees
-    # while abs(distance) > accuracy and (timer.time()) < (max_time * 1000):
-    #     distance = abs(hub.imu.heading() - angle)
-    #     speed = min(max_speed, max(distance + kp, min_speed))
-    #     leftW.run(int(direction * speed))
-    #     rightW.run(int(-direction * speed))
-    #     # wait(20)
-
-    leftW.hold()
-    rightW.hold()
 
 
 def wall_turn(angle, speed=180):
@@ -462,8 +473,28 @@ def follow_line(base_speed, distance, kp=3, side="right", sensor=frontCS, stop=T
         rightW.run(base_speed - change)
 
     if stop:
-        leftW.hold()
-        rightW.hold()
+        wheels_stop()
+
+
+def follow_line_until_color(
+    base_speed, color=Color.GREEN, kp=3, side="right", sensor=frontCS, stop=True
+):
+    """Follows a line with specified sensor until the sensor sees a certain color
+    base_speed = mm/s"""
+    base_speed = base_speed * 360 / W_CIRC
+    wheels.drive(base_speed, 0)
+    direction = 1 if base_speed > 0 else -1
+    if side == "right":
+        direction *= -1
+
+    while frontCS.color() != color:
+        error = TARGET - sensor.reflection()
+        change = int(error * kp * direction)
+        leftW.run(base_speed + change)
+        rightW.run(base_speed - change)
+
+    if stop:
+        wheels_stop()
 
 
 def follow_line_time(
@@ -488,8 +519,7 @@ def follow_line_time(
         rightW.run(base_speed - change)
 
     if stop:
-        leftW.hold()
-        rightW.hold()
+        wheels_stop()
 
 
 def linear_generator(duration):

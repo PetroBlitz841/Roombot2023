@@ -143,101 +143,80 @@ def green_run():
 
 def red_run():
     reset()
+    gyro_time(60, 2, 0)  # drive to the factory
+    gyro_follow(-45, 8, 0)  # back from the factory
 
-    # TOY FACTORY
-    wheels.drive(330, 0)
-    wait(2000)
-    wheels.straight(-200)  # back from the factory
-
-    # POWER PLANT
-    no_wall_turn(-55)
+    # Power Plant
+    no_wall_turn(-41)
     wall_turn(90)  # positioning to drive to black line
-    wheels.drive(350, 0)
-    wait(900)
-    turn_to_angle(-20)
-    drive_until_black(speed=300, stop=False)
-    wheels.straight(450)  # center robot on black line
-    no_wall_turn(48)  # turn in place
-    wheels.drive(150, 0)  # drive until green
+    gyro_time(65, 0.6, -41, kp=1, stop=False)
+    gyro_until_black(
+        70, angle=-35, kp=1.2, sensor=frontCS, black=32
+    )  # drive to black line
+
+    wheels.straight(35, then=Stop.HOLD, wait=True)  # center robot on black line
+    no_wall_turn(45)  # turn in place
+    wheels.drive(35, 0)  # drive until green
+    # sees_green = False
     while not frontCS.color() == Color.GREEN:
         ...
-    wheels_stop()
-    wall_turn(90)  # turn wall to position
-    follow_line(-150, 105, kp=3, side="right", sensor=backCS, stop=False)
-    wheels.drive(-500, turn_rate=0)
-    wait(800)
-    wheels_stop()
-
-    # SMART GRID
-    wheels.straight(30)
-    turn_to_angle(48)
-    wheels.straight(600)
-
     # rgb = frontCS.get_rgb_intensity()
     # sees_green = (rgb[1] - ((rgb[0] + rgb[2]) / 2) > 75) and rgb[
     #     3
     # ] < 800  # Green is 75 higher than average of red and blue, excluding white
 
+    wheels.stop()
+    wall_turn(85)  # turn wall to position
+    follow_line(
+        -32, 12, kp=0.7, side="right", sensor=backCS, stop=False
+    )  # align trigger
+    # towards power plant
+    rightW.run_time(-55, 1700, then=Stop.HOLD, wait=True)
+    leftW.run_time(-55, 1700, then=Stop.HOLD, wait=True)
+    if hub.imu.heading() >= 50:
+        rightW.run_angle(20, 35)
+    # reverse from power plant
+    leftW.run_time(30, 800, then=Stop.HOLD, wait=True)
+    rightW.run_time(30, 800, then=Stop.HOLD, wait=True)
 
-# ------
-# leftW.hold()
-# rightW.hold()
-# wall_turn(90)  # turn wall to position
-# follow_line(
-#     -150, 105, kp=3, side="right", sensor=backCS, stop=False
-# )  # align trigger
-# # towards power plant
-# --------
-# rightW.run_time(-700, 1500, then=Stop.HOLD, wait=False)
-# leftW.run_time(-700, 1500, then=Stop.HOLD, wait=True)
+    # Smart Electricity Grid
+    turn_to_angle(45)  # turn to grid
+    wall_turn(90)  # position grabbing attachment
+    gyro_follow(60, 20, 46, kp=0.5)
+    accelerate(0.5, 60, 15)  # grab
+    wheels.stop()
 
-# if hub.imu.heading() >= 50:
-#     rightW.run_angle(200, 35)
+    # Water Units
+    gyro_until_black(-35, hub.imu.heading())  # back until line
+    gyro_follow(-45, 1, 46, kp=0.5)  # back
+    turn_to_angle(-45)  # turn towards water units
+    gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
+    gyro_follow(-75, 3, -55, kp=0.5)  # back
+    turn_to_angle(0)  # turn to line
 
-# reverse from power plant
-# leftW.run_time(250, 800, then=Stop.HOLD, wait=True)
-# rightW.run_time(250, 800, then=Stop.HOLD, wait=True)
-# # Smart Electricity Grid
-# wheels.straight(100)
-# # turn_to_angle(50)  # turn to grid
+    # Oil Rig
+    gyro_until_black(30, 1)  # back until line
+    gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
+    turn_until_black(25)
+    follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
+    wall_turn(50)  # Position ramp
+    gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
 
-# wall_turn(90)  # position grabbing attachment
-# wheels.straight(550)
-# gyro_follow(350, 20, 50, kp=0.5)
-# # accelerate(0.5, 400, 200)  # grab
-# wheels.stop()
+    for i in range(3):  # Push oil rig
+        # drive back
+        leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+        rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
+        # drive forward
+        leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
+        rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
+    # Back to base
+    wheels.straight(80)
+    no_wall_turn(-105)
+    wheels.drive(80, 0)
 
-# # Water Units
-# gyro_until_black(-35, hub.imu.heading())  # back until line
-# gyro_follow(-45, 1, 46, kp=0.5)  # back
-# turn_to_angle(-45)  # turn towards water units
-# gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
-# gyro_follow(-75, 3, -55, kp=0.5)  # back
-# turn_to_angle(0)  # turn to line
-
-# # Oil Rig
-# gyro_until_black(30, 1)  # back until line
-# gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
-# turn_until_black(25)
-# follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
-# wall_turn(50)  # Position ramp
-# gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
-
-# for i in range(3):  # Push oil rig
-#     # drive back
-#     leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-#     rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-#     # drive forward
-#     leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
-#     rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
-# # Back to base
-# wheels.straight(80)
-# no_wall_turn(-105)
-# wheels.drive(80, 0)
-
-# wait(3000)
-# while True:
-#     pass
+    wait(3000)
+    while True:
+        pass
 
 
 def cyan_run():

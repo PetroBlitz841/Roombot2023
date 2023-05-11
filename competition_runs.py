@@ -41,10 +41,10 @@ COLOR_LIST = [
     Color.RED,
     Color.BLUE,
     Color.YELLOW,
-    Color.MAGENTA,
-    Color.NONE,
-    Color.CYAN,
+    Color.VIOLET,
+    Color(h=339, s=85, v=94),
 ]
+
 frontCS.detectable_colors(COLOR_LIST)
 backCS.detectable_colors(COLOR_LIST)
 
@@ -93,11 +93,10 @@ def green_run():
     arm.reset_angle(0)
 
     # TV Mission
-    # gyro_follow(300, 11, angle=0, stop=False)
     wheels.settings(straight_speed=400)
-    wheels.straight(40, then=Stop.NONE)
-    accelerate(2.1, 400, 100, stop=True)  # slows before tv
-    wheels.straight(-135)
+    wheels.straight(90, then=Stop.NONE, wait=True)
+    accelerate(2, 400, 100, stop=True)  # slows before tv
+    wheels.straight(-150)
     no_wall_turn(-45, speed=90)  # no wall turn to the rechargable battery
     wheels.settings(straight_speed=350)
     wheels.straight(510)
@@ -121,25 +120,23 @@ def green_run():
 
     # HYBRID CAR
     turn_to_angle(45)
-    wheels.straight(-245, then=Stop.HOLD, wait=True)  # back from wind turbine
-    # turn_to_angle(50)
-    # wait(1000)
-    # wheels.straight(-70)
+    wheels.straight(-270, then=Stop.HOLD, wait=True)  # back from wind turbine
+    wheels.straight(40)
     turn_to_angle(115)  # turn towards hybrid car
     wall_turn(0)
-    wheels.straight(-210)
+    gyro_until_black(-250, 115, sensor=backCS, stop=False)
+    wheels.straight(-150)
     arm.run_angle(900, 120, then=Stop.HOLD, wait=True)  # reset arm
-    turn_to_angle(142)
-    wheels.straight(-130)
+    turn_to_angle(155)
+    wheels.straight(-100)
     arm.run_angle(1000, -150, then=Stop.HOLD, wait=True)  # do mission
     arm.run_angle(900, 130, then=Stop.HOLD, wait=True)
 
-    # # HOMEWARDS
-    wheels.straight(450)
-    turn_to_angle(150)
-    wheels.drive(800, 0)
-    while True:
-        pass
+    # HOMEWARDS
+    wheels.settings(straight_speed=500)
+    turn_to_angle(130)
+    wheels.straight(300)
+    wheels.drive(500, 30)
 
 
 def red_run():
@@ -209,11 +206,11 @@ def red_run():
     wheels.straight(70)
     wall_turn(90)
     wheels.straight(700)
-    wheels.turn(10)
+    wheels.turn(20)
     wheels.straight(10000)
 
 
-def cyan_run():
+def magenta_run():
     reset()
     wheels.settings(straight_speed=500)
     wheels.straight(230)
@@ -225,29 +222,29 @@ def cyan_run():
 
 def blue_run():
     reset()
-    # relissing 3 untis to magar enrgia
-    gyro_until_black(250, angle=0, kp=2, sensor=frontCS, stop=False)  # לתחילת הקו השחור
+
+    # ENERGY STORAGE
+    gyro_until_black(250, angle=0, kp=2, sensor=frontCS, stop=False)
     wheels.straight(90)
     wall.run_angle(600, 45, then=Stop.HOLD, wait=True)
     turn_to_angle(38)
-    follow_line_time(170, 2.8, kp=2.7, side="left", sensor=frontCS, stop=True)
-    # towarsds energy storage
+    follow_line_time(170, 2.8, kp=3, side="left", sensor=frontCS, stop=True)
 
-    # solar farm
-    wheels.settings(straight_speed=300)
+    # SOLAR FARM
+    wheels.settings(straight_speed=250)
     wheels.straight(-30)
     turn_to_angle(90)  # turn
-    wheels.straight(200)
+    wheels.straight(190)
     wall.run_angle(180, -135, then=Stop.HOLD, wait=True)  # tirn wall to good postion
     turn_to_angle(0)  # turn t 2 units
     wheels.drive(250, 0)  # take 2 units
     wait(1000)
-    wheels.straight(-1)
-    no_wall_turn(85)  # turn to third unit
+    wheels.straight(-20)
+    no_wall_turn(90)  # turn to third unit
     wheels.settings(straight_speed=500)
-    wheels.straight(380)
+    wheels.straight(360)
 
-    # # power to x
+    # POWERTO X
     turn_to_angle(-35)  # turn to power to x
     wheels.settings(straight_speed=300)
     wheels.straight(-385)
@@ -300,6 +297,7 @@ def reset():
                 [100, 0, 0, 0, 100],
             ]
         )
+        wait(500)
 
 
 def deg_to_cm(degrees):
@@ -529,10 +527,17 @@ def accelerate(seconds, start_power, end_power, stop=False):
 # Main Loop
 # ________________________________________________________________________________________________________________
 
+GREEN = 0
+RED = 0
+MAGENTA = (339, 85, 94)
+BLUE = 0
+YELLOW = 0
+BLACK = 0
+
 RUNS = [
     green_run,
     red_run,
-    cyan_run,
+    magenta_run,
     blue_run,
     yellow_run,
     haratza9,
@@ -540,7 +545,7 @@ RUNS = [
 RUN_COLORS = [
     Color.GREEN,
     Color.RED,
-    Color.CYAN,
+    Color(h=339, s=85, v=94),
     Color.BLUE,
     Color.YELLOW,
     Color.BLACK,

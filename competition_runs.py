@@ -192,9 +192,9 @@ def red_run():
 
 def magenta_run():
     reset()
-    wheels.settings(straight_speed=500)
-    wheels.straight(400, wait=False)
-    wait(300)
+    wheels.settings(straight_speed=400)
+    wheels.straight(300, wait=False)
+    # wait(300)
     wall_turn(-90)  # turn wall to move enrgay unite
     # wheels.drive(500, 0)  # take unite and water unite
     wait(800)  # wait fir water to drop

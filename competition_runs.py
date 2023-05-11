@@ -57,25 +57,6 @@ leftW.reset_angle(0)
 rightW.reset_angle(0)
 settings = wheels.settings()
 
-# Print info
-print(f"Battery: V {hub.battery.voltage()} C {hub.battery.current()}")
-print(
-    f"Drivebase (Dist): S {wheels.distance_control.limits()[0]} A {wheels.distance_control.limits()[1]} T {wheels.distance_control.limits()[2]}"
-)
-print(
-    f"Drivebase (Head): S {wheels.heading_control.limits()[0]} A {wheels.heading_control.limits()[1]} T {wheels.heading_control.limits()[2]}"
-)
-print(
-    f"Left W: S {leftW.control.limits()[0]} A {leftW.control.limits()[1]} T {leftW.control.limits()[2]}"
-)
-print(
-    f"Right W: S {rightW.control.limits()[0]} A {rightW.control.limits()[1]} T {rightW.control.limits()[2]}"
-)
-print(
-    f"Wall: S {wall.control.limits()[0]} A {wall.control.limits()[1]} T {wall.control.limits()[2]}"
-)
-print("is ready: ", hub.imu.ready())
-
 
 class PetroError(Exception):
     ...
@@ -135,7 +116,7 @@ def green_run():
     # HOMEWARDS
     wheels.settings(straight_speed=500)
     turn_to_angle(130)
-    wheels.straight(300)
+    wheels.straight(400)
     wheels.drive(500, 30)
 
 
@@ -144,17 +125,18 @@ def red_run():
     wheels.settings(straight_speed=400)
 
     # TOY FACTORY
-    wheels.straight(450)
+    wheels.drive(400, -3)
+    wait(1500)
 
     # POWER PLANT
-    wheels.straight(-230)  # back from toy factory
+    wheels.straight(-200)  # back from toy factory
     no_wall_turn(-55)
     wall_turn(90)
     wheels.drive(350, 0)
     wait(1000)
     wheels_stop()
     turn_to_angle(-29)
-    gyro_until_black(300, -29, stop=False)  # until black
+    gyro_until_black(370, -29, stop=False)  # until black
     wheels.straight(55)
     no_wall_turn(46)
     wheels.straight(1000, wait=False)
@@ -162,9 +144,9 @@ def red_run():
         ...
     wheels_stop()
     wall_turn(90)  # set wall
-    follow_line(-170, 170, kp=3, sensor=backCS, stop=False)
+    follow_line(-25, 170, kp=0.7, sensor=backCS, stop=False, side="left")
     wheels.drive(-300, 0)
-    wait(800)
+    wait(850)
     wheels_stop()
     if hub.imu.heading() >= 50:
         rightW.run_angle(20, 35)
@@ -172,7 +154,7 @@ def red_run():
     # SMART GRID
     wheels.settings(straight_speed=200)
     wheels.straight(50)
-    wheels.settings(straight_speed=200)
+    wheels.settings(straight_speed=300)
     turn_to_angle(46)
     wheels.straight(750)
 
@@ -186,16 +168,16 @@ def red_run():
     # OIL PLATFORM
     wheels.straight(-130)
     turn_to_angle(-25)
-    gyro_until_black(300, -25, stop=False)  # towards line
-    wheels.straight(70)
-    turn_until_black(-150)
-    rightW.run_angle(40, 15)
-    follow_line(150, distance=200, kp=3.4, side="right")
-    wall_turn(45)
-    follow_line(150, 130, kp=3.4, side="right")
+    gyro_until_black(300, -25, stop=False, black=12)  # towards line
+    leftW.hold()
+    rightW.run_angle(40, 90)
+
+    follow_line(30, distance=200, kp=0.6, side="left", stop=False)
+    wall_turn(45, wait=False)
+    follow_line(30, distance=130, kp=0.45, side="left", stop=False)
     wheels.settings(straight_speed=350)
-    wheels.straight(270)
-    for i in range(3):
+    gyro_time(200, 1.5, -45, kp=1)
+    for _ in range(3):
         wheels.straight(-80)
         wheels.straight(170)
 
@@ -203,19 +185,18 @@ def red_run():
     wheels.straight(-120)
     no_wall_turn(-125)
     wheels.settings(straight_speed=500)
-    wheels.straight(70)
-    wall_turn(90)
-    wheels.straight(700)
-    wheels.turn(20)
-    wheels.straight(10000)
+    wheels.straight(70, then=Stop.NONE)
+    wall_turn(90, wait=False)
+    wheels.straight(4000)
 
 
 def magenta_run():
     reset()
     wheels.settings(straight_speed=500)
-    wheels.straight(230)
+    wheels.straight(400, wait=False)
+    wait(300)
     wall_turn(-90)  # turn wall to move enrgay unite
-    wheels.drive(500, 0)  # take unite and water unite
+    # wheels.drive(500, 0)  # take unite and water unite
     wait(800)  # wait fir water to drop
     wheels.drive(-600, 0)
 
@@ -228,7 +209,7 @@ def blue_run():
     wheels.straight(90)
     wall.run_angle(600, 45, then=Stop.HOLD, wait=True)
     turn_to_angle(38)
-    follow_line_time(170, 2.8, kp=3, side="left", sensor=frontCS, stop=True)
+    follow_line_time(35, 2.8, kp=0.5, side="left", sensor=frontCS, stop=True)
 
     # SOLAR FARM
     wheels.settings(straight_speed=250)
@@ -300,7 +281,7 @@ def reset():
         wait(500)
 
 
-def deg_to_cm(degrees):
+def deg_to_mm(degrees):
     return (degrees / 360) * W_CIRC
 
 
@@ -340,15 +321,15 @@ def drive_until_black(speed, sensor=frontCS, turn_rate=0, stop=True, black=BLACK
         wheels_stop()
 
 
-def turn_until_black(speed, sensor=frontCS):
+def turn_until_black(speed, sensor=frontCS, stop=True, black=BLACK):
     """Turns in place until sensor reaches reflected light threshold
     speed: deg/s of the robot"""
     turn_in_place(speed)
-    while sensor.reflection() > BLACK:
+    while sensor.color() > BLACK:
         pass
 
-    leftW.hold()
-    rightW.hold()
+    if stop:
+        wheels_stop()
 
 
 def gyro_follow(base_speed, distance, angle=0, kp=2, stop=True):
@@ -402,11 +383,11 @@ def turn_to_angle(angle, speed=200, max_time=3):
     wheels.settings(turn_rate=robot_acceleration)
 
 
-def wall_turn(angle, speed=180):
+def wall_turn(angle, speed=180, wait=True):
     """Turns the wall to a specified degree value
     speed: deg/s of the wall"""
     distance = angle - (wall.angle() % 360)
-    wall.run_angle(speed, distance, then=Stop.HOLD, wait=True)
+    wall.run_angle(speed, distance, then=Stop.HOLD, wait=wait)
 
 
 def no_wall_turn(angle, speed=180):
@@ -425,9 +406,9 @@ def no_wall_turn(angle, speed=180):
     wall.control.limits(acceleration=motor_acceleration)
 
 
-def get_average_distance():
+def get_average_distance_mm():
     """Returns the average distance of both wheels"""
-    return deg_to_cm((abs(rightW.angle())) + abs(leftW.angle())) / 2
+    return deg_to_mm((abs(rightW.angle())) + abs(leftW.angle())) / 2
 
 
 def wheels_stop():
@@ -437,40 +418,19 @@ def wheels_stop():
 
 def follow_line(base_speed, distance, kp=3, side="right", sensor=frontCS, stop=True):
     """Follows a line with specified sensor for a set distance
-    base_speed = mm/s"""
+    base_speed = -100 to 100
+    distance: mm"""
     base_speed = base_speed * 360 / W_CIRC
-    wheels.drive(base_speed, 0)
     direction = 1 if base_speed > 0 else -1
-    if side == "right":
+    if side == "left":
         direction *= -1
     rightW.reset_angle(0)
     leftW.reset_angle(0)
-    while abs(get_average_distance()) < abs(distance):
+    while abs(get_average_distance_mm()) < abs(distance):
         error = TARGET - sensor.reflection()
         change = int(error * kp * direction)
-        leftW.run(base_speed + change)
-        rightW.run(base_speed - change)
-
-    if stop:
-        wheels_stop()
-
-
-def follow_line_until_color(
-    base_speed, color=Color.GREEN, kp=3, side="right", sensor=frontCS, stop=True
-):
-    """Follows a line with specified sensor until the sensor sees a certain color
-    base_speed = mm/s"""
-    base_speed = base_speed * 360 / W_CIRC
-    wheels.drive(base_speed, 0)
-    direction = 1 if base_speed > 0 else -1
-    if side == "right":
-        direction *= -1
-
-    while frontCS.color() != color:
-        error = TARGET - sensor.reflection()
-        change = int(error * kp * direction)
-        leftW.run(base_speed + change)
-        rightW.run(base_speed - change)
+        leftW.dc(base_speed + change)
+        rightW.dc(base_speed - change)
 
     if stop:
         wheels_stop()
@@ -480,7 +440,8 @@ def follow_line_time(
     base_speed, seconds, kp=3, side="right", sensor=frontCS, stop=True
 ):
     """Follows a line with specified sensor for a certain time
-    base_speed = mm/s"""
+    base_speed = -100 to 100
+    distance: mm"""
     base_speed = base_speed * 360 / W_CIRC
     wheels.drive(base_speed, 0)
     direction = 1 if base_speed > 0 else -1
@@ -494,8 +455,8 @@ def follow_line_time(
     while (timer.time()) < (seconds * 1000):
         error = TARGET - sensor.reflection()
         change = int(error * kp * direction)
-        leftW.run(base_speed + change)
-        rightW.run(base_speed - change)
+        leftW.dc(base_speed + change)
+        rightW.dc(base_speed - change)
 
     if stop:
         wheels_stop()
@@ -526,13 +487,6 @@ def accelerate(seconds, start_power, end_power, stop=False):
 # _______________________________________________________________________________________________________________
 # Main Loop
 # ________________________________________________________________________________________________________________
-
-GREEN = 0
-RED = 0
-MAGENTA = (339, 85, 94)
-BLUE = 0
-YELLOW = 0
-BLACK = 0
 
 RUNS = [
     green_run,

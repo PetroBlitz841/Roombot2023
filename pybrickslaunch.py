@@ -1,4 +1,4 @@
-HUB_NAME = "PetroBlitz2"
+HUB_NAME = "PetroBlitz"
 
 import os
 import asyncio

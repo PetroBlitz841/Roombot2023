@@ -158,24 +158,16 @@ def red_run():
     wheels_stop()
     turn_to_angle(-29)
     gyro_until_black(300, -29, stop=False)  # until black
-    wheels.straight(65)
-    no_wall_turn(50)
+    wheels.straight(55)
+    no_wall_turn(46)
     wheels.straight(1000, wait=False)
     while not frontCS.color() == Color.GREEN:
         ...
     wheels_stop()
     wall_turn(90)  # set wall
-    follow_line(-250, 170, kp=3.4, sensor=backCS, stop=False)
-    wheels.settings(straight_speed=320)
-    # wheels.straight(-110)
-    wheels.drive(-250, 0)
-    wait(900)
-    timer = StopWatch()
-    timer.reset()
-    while not wheels.stalled() or (timer.time() < 2000):
-        print(timer.time())
-        pass
-    wait(200)
+    follow_line(-170, 170, kp=3, sensor=backCS, stop=False)
+    wheels.drive(-300, 0)
+    wait(800)
     wheels_stop()
     if hub.imu.heading() >= 50:
         rightW.run_angle(20, 35)
@@ -183,63 +175,42 @@ def red_run():
     # SMART GRID
     wheels.settings(straight_speed=200)
     wheels.straight(50)
-    # turn_to_angle(46)
     wheels.settings(straight_speed=200)
     turn_to_angle(46)
     wheels.straight(750)
-    # gyro_until_black(-300, angle=47, stop=False)
 
     # WATER UNITS
+    wheels.straight(-85)
+    turn_to_angle(-65)
+    wheels.settings(straight_speed=300)
+    wheels.straight(250)
+    wheels.settings(straight_speed=200)
+
+    # OIL PLATFORM
     wheels.straight(-130)
-    turn_to_angle(-50)
-    wheels.straight(180)
-    wheels.straight(-120)
     turn_to_angle(-25)
-    gyro_until_black(300, -25, stop=False)
-    wheels.straight(200)
-    # turn_to_angle(-45)
+    gyro_until_black(300, -25, stop=False)  # towards line
+    wheels.straight(70)
     turn_until_black(-150)
-    leftW.run_angle(400, 25)
-    wait(1000)
-    follow_line(250, 300, kp=3.4, sensor=frontCS, stop=False)
-    # rightW.run_angle(180, 20)
+    rightW.run_angle(40, 15)
+    follow_line(150, distance=200, kp=3.4, side="right")
+    wall_turn(45)
+    follow_line(150, 130, kp=3.4, side="right")
+    wheels.settings(straight_speed=350)
+    wheels.straight(270)
+    for i in range(3):
+        wheels.straight(-80)
+        wheels.straight(170)
 
-    # follow_line(300, 200)
-    # wall_turn(45)
-
-    # ___________________________________________________________
-    # wait(20000)
-    # # Water Units
-    # gyro_until_black(-35, hub.imu.heading())  # back until line
-    # gyro_follow(-45, 1, 46, kp=0.5)  # back
-    # turn_to_angle(-45)  # turn towards water units
-    # gyro_follow(45, 6.5, -55, kp=0.5)  # drive towards them
-    # gyro_follow(-75, 3, -55, kp=0.5)  # back
-    # turn_to_angle(0)  # turn to line
-
-    # # Oil Rig
-    # gyro_until_black(30, 1)  # back until line
-    # gyro_follow(40, 2.5, 30, kp=0.5)  # center on line
-    # turn_until_black(25)
-    # follow_line(40, 35, kp=0.4, side="left", sensor=frontCS)  # Drive to oil rig
-    # wall_turn(50)  # Position ramp
-    # gyro_follow(50, 9, -43, kp=0.5)  # drive towards them
-
-    # for i in range(3):  # Push oil rig
-    #     # drive back
-    #     leftW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-    #     rightW.run_time(-60, 400, then=Stop.HOLD, wait=True)
-    #     # drive forward
-    #     leftW.run_time(70, 600, then=Stop.HOLD, wait=True)
-    #     rightW.run_time(70, 600, then=Stop.HOLD, wait=True)
-    # # Back to base
-    # wheels.straight(80)
-    # no_wall_turn(-105)
-    # wheels.drive(80, 0)
-
-    # wait(3000)
-    # while True:
-    #     pass
+    # HOMEWARDS
+    wheels.straight(-120)
+    no_wall_turn(-125)
+    wheels.settings(straight_speed=500)
+    wheels.straight(70)
+    wall_turn(90)
+    wheels.straight(700)
+    wheels.turn(10)
+    wheels.straight(10000)
 
 
 def cyan_run():
@@ -319,6 +290,16 @@ def reset():
     wall.reset_angle(0)
     hub.imu.reset_heading(0)
     wheels.settings(settings[0], settings[1], settings[2], settings[3])
+    if not hub.imu.ready():
+        hub.display.icon(
+            [
+                [100, 0, 0, 0, 100],
+                [0, 100, 0, 100, 0],
+                [0, 0, 100, 0, 0],
+                [0, 100, 0, 100, 0],
+                [100, 0, 0, 0, 100],
+            ]
+        )
 
 
 def deg_to_cm(degrees):

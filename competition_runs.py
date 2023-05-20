@@ -196,7 +196,7 @@ def magenta_run():
     wheels.straight(300, wait=False)
     # wait(300)
     wall_turn(-90)  # turn wall to move enrgay unite
-    # wheels.drive(500, 0)  # take unite and water unite
+    wheels.drive(500, 0)  # take unite and water unite
     wait(800)  # wait fir water to drop
     wheels.drive(-600, 0)
 
@@ -205,7 +205,7 @@ def blue_run():
     reset()
 
     # ENERGY STORAGE
-    gyro_until_black(250, angle=0, kp=2, sensor=frontCS, stop=False)
+    gyro_until_black(200, angle=0, kp=2.3, sensor=frontCS, stop=False)
     wheels.straight(90)
     wall.run_angle(600, 45, then=Stop.HOLD, wait=True)
     turn_to_angle(38)
@@ -216,7 +216,7 @@ def blue_run():
     wheels.straight(-30)
     turn_to_angle(90)  # turn
     wheels.straight(190)
-    wall.run_angle(180, -135, then=Stop.HOLD, wait=True)  # tirn wall to good postion
+    wall.run_angle(180, -135, then=Stop.HOLD, wait=False)  # tirn wall to good postion
     turn_to_angle(0)  # turn t 2 units
     wheels.drive(250, 0)  # take 2 units
     wait(1000)

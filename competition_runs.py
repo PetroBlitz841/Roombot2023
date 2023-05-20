@@ -49,7 +49,7 @@ frontCS.detectable_colors(COLOR_LIST)
 backCS.detectable_colors(COLOR_LIST)
 
 TARGET = 60
-BLACK = 20
+BLACK = 18
 WHITE = 98
 
 # Reset Wheels
@@ -62,6 +62,8 @@ class PetroError(Exception):
     ...
 
 
+# print(hub.battery.voltage())
+
 # _______________________________________________________________________________________________________________
 # Run Functions
 # _______________________________________________________________________________________________________________
@@ -70,17 +72,17 @@ class PetroError(Exception):
 def green_run():
     # initialize
     reset()
-    arm = Motor(Port.C)
-    arm.reset_angle(0)
+    # arm = Motor(Port.C)
+    # arm.reset_angle(0)
 
     # TV Mission
-    wheels.settings(straight_speed=400)
-    wheels.straight(90, then=Stop.NONE, wait=True)
-    accelerate(2, 400, 100, stop=True)  # slows before tv
-    wheels.straight(-150)
-    no_wall_turn(-45, speed=90)  # no wall turn to the rechargable battery
+    wheels.settings(straight_speed=280)
+    wheels.straight(400, then=Stop.NONE, wait=True)
+    # accelerate(2.5, 350, 80, stop=True)  # slows before tv
+    wheels.straight(-170)
+    no_wall_turn(-46, speed=90)  # no wall turn to the rechargable battery
     wheels.settings(straight_speed=350)
-    wheels.straight(510)
+    wheels.straight(570)
 
     # WIND TURBINE
     turn_to_angle(45)  # turns to the wind turbine
@@ -101,36 +103,48 @@ def green_run():
 
     # HYBRID CAR
     turn_to_angle(45)
-    wheels.straight(-270, then=Stop.HOLD, wait=True)  # back from wind turbine
-    wheels.straight(40)
-    turn_to_angle(115)  # turn towards hybrid car
-    wall_turn(0)
-    gyro_until_black(-250, 115, sensor=backCS, stop=False)
-    wheels.straight(-150)
-    arm.run_angle(900, 120, then=Stop.HOLD, wait=True)  # reset arm
-    turn_to_angle(155)
-    wheels.straight(-100)
-    arm.run_angle(1000, -150, then=Stop.HOLD, wait=True)  # do mission
-    arm.run_angle(900, 130, then=Stop.HOLD, wait=True)
+    wheels.straight(-300, then=Stop.HOLD, wait=True)  # back from wind turbine
+    wheels.settings(straight_speed=350)
+    wheels.straight(100)
+    turn_to_angle(140)
+    wheels.curve(900, 70)
+    # turn_to_angle(140)
+    # wheels.straight(400)
+    # turn_to_angle(150)
+
+    # wheels.straight(40)
+    # turn_to_angle(110)  # turn towards hybrid car
+    # gyro_until_black(-250, 110, sensor=backCS, stop=False)
+    # wheels.straight(-150)
+    # arm.run_angle(900, 120, then=Stop.HOLD, wait=True)  # reset arm
+    # turn_to_angle(153)
+    # wheels.straight(-100)
+    # turn_to_angle(155)
+
+    # arm.run_angle(1000, -170, then=Stop.HOLD, wait=True)  # do mission
+    # arm.run_angle(900, 150, then=Stop.HOLD, wait=True)
+    # wheels.straight(100)
 
     # HOMEWARDS
-    wheels.settings(straight_speed=500)
-    turn_to_angle(130)
-    wheels.straight(400)
-    wheels.drive(500, 30)
+    # turn_to_angle(138)
+    # wheels.settings(straight_speed=500)
+    # wheels.straight(400)
+    # wheels.drive(500, 30)
 
 
 def red_run():
     reset()
+    wheels.settings(straight_speed=350)
+    wheels.straight(460)
     wheels.settings(straight_speed=400)
 
     # TOY FACTORY
-    wheels.drive(400, -3)
-    wait(1500)
+    # wheels.drive(400, -3)
+    # wait(1500)
 
     # POWER PLANT
     wheels.straight(-200)  # back from toy factory
-    no_wall_turn(-55)
+    no_wall_turn(-56)
     wall_turn(90)
     wheels.drive(350, 0)
     wait(1000)
@@ -144,9 +158,9 @@ def red_run():
         ...
     wheels_stop()
     wall_turn(90)  # set wall
-    follow_line(-25, 170, kp=0.7, sensor=backCS, stop=False, side="left")
+    follow_line(-22, 170, kp=0.5, sensor=backCS, stop=False, side="left")
     wheels.drive(-300, 0)
-    wait(850)
+    wait(880)
     wheels_stop()
     if hub.imu.heading() >= 50:
         rightW.run_angle(20, 35)
@@ -187,17 +201,18 @@ def red_run():
     wheels.settings(straight_speed=500)
     wheels.straight(70, then=Stop.NONE)
     wall_turn(90, wait=False)
-    wheels.straight(4000)
+    wheels.drive(400, 20)
+    # wheels.straight(4000)
 
 
 def magenta_run():
     reset()
-    wheels.settings(straight_speed=400)
-    wheels.straight(300, wait=False)
+    wheels.settings(straight_speed=500)
+    wheels.straight(230, wait=True, then=Stop.HOLD)
     # wait(300)
-    wall_turn(-90)  # turn wall to move enrgay unite
-    wheels.drive(500, 0)  # take unite and water unite
-    wait(800)  # wait fir water to drop
+    wall_turn(-92, speed=130)  # turn wall to move enrgay unite
+    wheels.drive(300, 0)  # take unite and water unite
+    wait(500)  # wait fir water to drop
     wheels.drive(-600, 0)
 
 
@@ -205,35 +220,37 @@ def blue_run():
     reset()
 
     # ENERGY STORAGE
-    gyro_until_black(200, angle=0, kp=2.3, sensor=frontCS, stop=False)
+    gyro_until_black(300, angle=0, kp=3, sensor=frontCS, stop=False)
     wheels.straight(90)
-    wall.run_angle(600, 45, then=Stop.HOLD, wait=True)
+    # wall.run_angle(600, 45, then=Stop.HOLD, wait=False)
+    wall_turn(45, wait=False, speed=130)
     turn_to_angle(38)
-    follow_line_time(35, 2.8, kp=0.5, side="left", sensor=frontCS, stop=True)
+    follow_line_time(25, 3.1, kp=0.45, side="left", sensor=frontCS, stop=True)
 
     # SOLAR FARM
     wheels.settings(straight_speed=250)
     wheels.straight(-30)
     turn_to_angle(90)  # turn
     wheels.straight(190)
-    wall.run_angle(180, -135, then=Stop.HOLD, wait=False)  # tirn wall to good postion
-    turn_to_angle(0)  # turn t 2 units
-    wheels.drive(250, 0)  # take 2 units
-    wait(1000)
-    wheels.straight(-20)
+    wall.run_angle(180, -135, then=Stop.HOLD, wait=True)  # tirn wall to good postion
+    turn_to_angle(1)  # turn t 2 units
+    wheels.straight(290)  # take 2 units
+    wheels.straight(-4)
+    wheels.straight(-35)
     no_wall_turn(90)  # turn to third unit
-    wheels.settings(straight_speed=500)
-    wheels.straight(360)
+    wheels.settings(straight_speed=250)
+    wheels.straight(380)
 
     # POWERTO X
-    turn_to_angle(-35)  # turn to power to x
+    turn_to_angle(-30)  # turn to power to x
     wheels.settings(straight_speed=300)
     wheels.straight(-385)
 
 
 def yellow_run():
     reset()
-    wall_turn(90)
+    wheels.settings(straight_speed=350)
+    wall_turn(90, wait=False)
     wheels.straight(600)
     # gyro_follow(200, 60, 0, kp=0.2)  # drive until m12
     wall.run_angle(1000, -180, then=Stop.HOLD, wait=True)
@@ -242,12 +259,13 @@ def yellow_run():
 
 def haratza9():
     reset()
-    wall.run_angle(700, 45)
-    wheels.drive(450, 0)
+    wall_turn(45, wait=False)
+    wheels.drive(450, -2)
     wait(2000)
-    wall.run_angle(700, 45)
-    wall.run_angle(700, -45)
-    wheels.drive(-400, 0)
+    wall_turn(60)
+    wall_turn(45, wait=False)
+    wait(800)
+    wheels.drive(-400, 3)
 
 
 # ________________________________________________________________________________________________________________

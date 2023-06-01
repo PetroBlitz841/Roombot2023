@@ -287,15 +287,15 @@ def reset():
     hub.imu.reset_heading(0)
     wheels.settings(settings[0], settings[1], settings[2], settings[3])
     if not hub.imu.ready():
-        hub.display.icon(
-            [
-                [100, 0, 0, 0, 100],
-                [0, 100, 0, 100, 0],
-                [0, 0, 100, 0, 0],
-                [0, 100, 0, 100, 0],
-                [100, 0, 0, 0, 100],
-            ]
-        )
+        # hub.display.icon(
+        #     [
+        #         [100, 0, 0, 0, 100],
+        #         [0, 100, 0, 100, 0],
+        #         [0, 0, 100, 0, 0],
+        #         [0, 100, 0, 100, 0],
+        #         [100, 0, 0, 0, 100],
+        #     ]
+        # )
         wait(500)
 
 
@@ -501,6 +501,39 @@ def accelerate(seconds, start_power, end_power, stop=False):
         leftW.hold()
         rightW.hold()
 
+def flip_chassis(normal_direction = True):
+    if normal_direction:
+        hub.display.icon(
+            [
+                [0, 0, 100, 0, 0],
+                [0, 100, 0, 0, 0],
+                [100, 100, 100, 100, 100],
+                [0, 100, 0, 0, 0],
+                [0, 0, 100, 0, 0],
+            ]
+        )
+        leftW = Motor(Port.F, positive_direction=Direction.COUNTERCLOCKWISE)
+        rightW = Motor(Port.B)
+        frontCS = ColorSensor(Port.D)
+        backCS = ColorSensor(Port.A)
+        wheels = GyroDriveBase(leftW, rightW, wheel_diameter=W_DIAMETER, axle_track=W_DISTANCE)
+    else:
+        hub.display.icon(
+            [
+                [0, 0, 100, 0, 0],
+                [0, 0, 0, 100, 0],
+                [100, 100, 100, 100, 100],
+                [0, 0, 0, 100, 0],
+                [0, 0, 100, 0, 0],
+            ]
+        )
+        leftW = Motor(Port.B, positive_direction=Direction.COUNTERCLOCKWISE)
+        rightW = Motor(Port.F)
+        frontCS = ColorSensor(Port.A)
+        backCS = ColorSensor(Port.D)
+        wheels = GyroDriveBase(leftW, rightW, wheel_diameter=W_DIAMETER, axle_track=W_DISTANCE)
+
+
 
 # _______________________________________________________________________________________________________________
 # Main Loop
@@ -528,13 +561,23 @@ reset()
 
 current_run = 0
 
-while True:
-    pressed = hub.buttons.pressed()
-    if Button.LEFT in pressed or Button.RIGHT in pressed:
-        try:
-            current_run = RUN_COLORS.index(backCS.color())
-            RUNS[current_run]()
-            # hub.display.number(current_run)
-        except ValueError as error:
-            if str(error) != "object not in sequence":
-                raise
+# while True:
+    # pressed = hub.buttons.pressed()
+    # if Button.LEFT in pressed or Button.RIGHT in pressed:
+# try:
+
+jig_color = backCS.color
+print(COLOR_LIST.index(jig_color))
+if jig_color == Color.WHITE:
+    print("flip")
+    flip_chassis(normal_direction=Flase)
+# current_run = RUN_COLORS.index(backCS.color())
+# print(current_run)
+# RUNS[current_run]()
+# hub.display.number(current_run)
+
+# except ValueError as error:
+#     if str(error) != "object not in sequence":
+#         raise
+
+print("end")
